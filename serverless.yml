@@ -1,0 +1,56 @@
+service: apistarwars
+frameworkVersion: "3"
+provider:
+  name: aws
+  runtime: nodejs16.x
+  stage: ${opt:stage,'dev'}
+  region: ${opt:region,'us-east-2'}
+  memorySize: 1024
+  apiGateway:
+    restApiId:
+      Ref: ApiGatewayRestApi
+    restApiRootResourceId:
+      Fn::GetAtt:
+        - ApiGatewayRestApi
+        - RootResourceId
+  environment: ${file(env.${self:provider.stage}.yml)}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetSecretValue
+          Resource: "*"
+
+resources:
+  Resources:
+    ApiGatewayRestApi:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Description: String
+        Name: api-deapie-administrator-module
+functions:
+  create-specie:
+    handler: ./app.createSpecieHandler
+    timeout: 30
+    events:
+      - http:
+          path: v1/api/create-specie
+          method: post
+          cors: true
+  get-id-specie:
+    handler: ./app.getIdSpecieHandler
+    timeout: 30
+    events:
+      - http:
+          path: v1/api/create-specie
+          method: post
+          cors: true
+  get-specie:
+    handler: ./app.getSpeciesHandler
+    timeout: 30
+    events:
+      - http:
+          path: v1/api/get-specie
+          method: post
+          cors: true
